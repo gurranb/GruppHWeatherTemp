@@ -30,9 +30,7 @@ namespace GruppHWeatherTemp.Methods
 
                 while (!reader.EndOfStream)
                 {
-
-                    string line = reader.ReadLine();
-                    
+                    string line = reader.ReadLine();                    
 
                     List<int> years = new List<int>();
                     List<int> months = new List<int>();
@@ -41,8 +39,7 @@ namespace GruppHWeatherTemp.Methods
                     List<int> minutes = new List<int>();
                     List<int> seconds = new List<int>();                     
                     List<decimal> temperatures = new List<decimal>();
-                    List<WeatherTools> tools = new List<WeatherTools>(); 
-                   
+                    List<WeatherTools> tools = new List<WeatherTools>();                 
 
 
 
@@ -211,57 +208,72 @@ namespace GruppHWeatherTemp.Methods
         }
         public static void DailyMidTemp(string fileName)
         {
-            string pattern4 = @"(?<year>\d{4})-(?<month>0[0-9]|1[0-2])-(?<day>0[0-9]|[12][0-9]|3[01]).(?<hour>[0-2][0-9]):(?<minute>[0-5][0-9]):(?<second>[0-5][0-9]).(?<location>(?:Inne|Ute)\b),(?<temperature>[0-9]?[0-9][.][0-9]),(?<humidity>\d{1,2}|100)";
-            //string pattern5 = @"(?<year>\d{4})-(?<month>0[0-9]|1[0-2])-(?<day>0[0-9]|[12][0-9]|3[01]).(?<hour>[0-2][0-9]):(?<minute>[0-5][0-9]):(?<second>[0-5][0-9]).(?<location>(?:Inne|Ute)\b),(?<temperature>[0-9]?[\d.][0-9]),(?<humidity>\d{1,2}|100)";
-            Dictionary<string, Dictionary<string, List<string>>> monthlyTemp = new Dictionary<string, Dictionary<string, List<string>>>();
+            string pattern = @"(?<year>\d{4})-(?<month>0[0-9]|1[0-2])-(?<day>0[0-9]|[12][0-9]|3[01]).(?<hour>[0-2][0-9]):(?<minute>[0-5][0-9]):(?<second>[0-5][0-9]).(?<location>(?:Inne|Ute)\b),(?<temperature>[0-9]?[0-9][.][0-9]),(?<humidity>\d{1,2}|100)";
+            Dictionary<string, Dictionary<string, List<string>>> dailyData = new Dictionary<string, Dictionary<string, List<string>>>();
+
             using (StreamReader reader = new StreamReader(path + fileName))
             {
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Match match = Regex.Match(line, pattern4);
+                    Match match = Regex.Match(line, pattern);
+
                     if (match.Success)
                     {
                         string month = match.Groups["month"].Value;
                         string day = match.Groups["day"].Value;
                         string location = match.Groups["location"].Value;
                         string temperature = match.Groups["temperature"].Value;
-                        string monthly = month.Substring(0, 2);
-                        string daily = day.Substring(0, 2);
-                        string datekey = (month + daily);
+                        string humidity = match.Groups["humidity"].Value;
+                        string dateKey = month + day;
 
-
-                        if (!monthlyTemp.ContainsKey(datekey))
+                        if (!dailyData.ContainsKey(dateKey))
                         {
-                            monthlyTemp.Add(datekey, new Dictionary<string, List<string>>());
+                            dailyData.Add(dateKey, new Dictionary<string, List<string>>());
+                        }
 
-                        }
-                        if (!monthlyTemp[datekey].ContainsKey(location))
+                        if (!dailyData[dateKey].ContainsKey(location))
                         {
-                            monthlyTemp[datekey].Add(location, new List<string>());
+                            dailyData[dateKey].Add(location, new List<string>());
                         }
-                        monthlyTemp[datekey][location].Add(temperature);
+
+                        dailyData[dateKey][location].Add($"{temperature},{humidity}");
                     }
                 }
             }
-            Dictionary<string, Dictionary<string, string>> medianTemp = new Dictionary<string, Dictionary<string, string>>();
-            foreach (var month in monthlyTemp)
+
+            Dictionary<string, Dictionary<string, string>> medianData = new Dictionary<string, Dictionary<string, string>>();
+
+            foreach (var date in dailyData)
             {
-                medianTemp.Add(month.Key, new Dictionary<string, string>());
-                foreach (var location in month.Value)
+                medianData.Add(date.Key, new Dictionary<string, string>());
+
+                foreach (var location in date.Value)
                 {
-                    medianTemp[month.Key].Add(location.Key, location.Value.OrderBy(t => t).Skip(location.Value.Count / 2).First());
-                }
-            }
-            foreach (var month in medianTemp)
-            {
-                Console.WriteLine($"Month + day: {month.Key}");
-                foreach (var location in month.Value)
-                {
-                    Console.WriteLine($" Location: {location.Key}, Median temp: {location.Value}");
+                    List<string> tempHumidityList = location.Value;
+                    List<double> temperatures = tempHumidityList.Select(entry => double.Parse(entry.Split(',')[0])).ToList();
+                    List<int> humidities = tempHumidityList.Select(entry => int.Parse(entry.Split(',')[1])).ToList();
+
+                    // Calculate median temperature
+                    double medianTemperature = temperatures.OrderBy(t => t).Skip(temperatures.Count / 2).First();
+                    // Calculate median humidity
+                    int medianHumidity = humidities.OrderBy(h => h).Skip(humidities.Count / 2).First();
+
+                    medianData[date.Key].Add(location.Key, $"{medianTemperature},{medianHumidity}");
                 }
             }
 
+            // Print results
+            foreach (var date in medianData)
+            {
+                Console.WriteLine($"Date: {date.Key}");
+                foreach (var location in date.Value)
+                {
+                    Console.WriteLine($" Location: {location.Key}, Median temp/humidity: {location.Value}");
+                }
+            }
         }
+
     }
-}
+    }
+
