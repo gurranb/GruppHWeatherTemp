@@ -66,15 +66,15 @@
 //    return readings;
 //}
 
-////static void DisplayAllReadings(List<Reading> readings)
-////{
-////    Console.WriteLine($"Readings for all dates:");
+//static void DisplayAllReadings(List<Reading> readings)
+//{
+//    Console.WriteLine($"Readings for all dates:");
 
-////    foreach (var reading in readings)
-////    {
-////        Console.WriteLine($"Timestamp: {reading.Timestamp}, Location: {reading.Location}, Temperature: {reading.Temperature}°C, Humidity: {reading.Humidity}%");
-////    }
-////}
+//    foreach (var reading in readings)
+//    {
+//        Console.WriteLine($"Timestamp: {reading.Timestamp}, Location: {reading.Location}, Temperature: {reading.Temperature}°C, Humidity: {reading.Humidity}%");
+//    }
+//}
 //static void CalculateAndDisplayAverages(DateTime selectedDate, List<Reading> readings)
 //{
 //    var selectedDateReadings = readings
