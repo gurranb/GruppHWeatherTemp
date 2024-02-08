@@ -50,6 +50,82 @@ namespace GruppHWeatherTemp.Methods
             return readings;
         }
 
+        public static void DisplayMonthlyData(List<WeatherTools> readings)
+        {
+            Console.WriteLine("Data per månad");
+            Console.WriteLine("------------------------------------------");
+
+            var uniqueDates = readings
+                    .GroupBy(r => new { r.Timestamp.Year, r.Timestamp.Month })
+                    .OrderByDescending(group => GetAverageTemperatureMonth(readings, group.Key.Year, group.Key.Month, "Ute"))
+                    .ToList();
+
+            foreach (var date in uniqueDates)
+            {
+                double averageTemperature = GetAverageTemperatureMonth(readings, date.Key.Year, date.Key.Month, "Ute");
+
+                if (averageTemperature != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C");
+
+                    string logText = $"Temperatur (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageMold = GetAverageMoldRisk(readings, date.Key.Year, date.Key.Month, "Ute");
+
+                if (averageMold != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}");
+                    string logText = $"Mögel (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageHumidity = GetAverageHumidityMonth(readings, date.Key.Year, date.Key.Month, "Ute");
+
+                if (averageHumidity != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %");
+                    string logText = $"Luftfuktighet (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+            }
+            var uniqueDates2 = readings
+                    .GroupBy(r => new { r.Timestamp.Year, r.Timestamp.Month })
+                    .OrderByDescending(group => GetAverageTemperatureMonth(readings, group.Key.Year, group.Key.Month, "Inne"))
+                    .ToList();
+            foreach (var date in uniqueDates2)
+            {
+                double averageTemperature = GetAverageTemperatureMonth(readings, date.Key.Year, date.Key.Month, "Inne");
+                if (averageTemperature != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C");
+
+                    string logText = $"Temperatur (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageMold = GetAverageMoldRisk(readings, date.Key.Year, date.Key.Month, "Inne");
+                if (averageMold != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}");
+                    string logText = $"Mögel (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageHumidity = GetAverageHumidityMonth(readings, date.Key.Year, date.Key.Month, "Inne");
+                if (averageHumidity != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %");
+                    string logText = $"Luftfuktighet (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+
+            }
+        }
+
         public static void DisplayAllReadings(List<WeatherTools> readings)
         {
             Console.WriteLine($"Readings for all dates:");
@@ -78,9 +154,6 @@ namespace GruppHWeatherTemp.Methods
                 if (averageMold != double.MinValue)
                 {
                     Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}");
-                    string logText = $"Mögel (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}";
-                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
-                    saveDelegate(logText);
                 }
 
             }
@@ -103,9 +176,6 @@ namespace GruppHWeatherTemp.Methods
                 if (averageMold != double.MinValue)
                 {
                     Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}");
-                    string logText = $"Mögel (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}";
-                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
-                    saveDelegate(logText);
                 }
 
             }
@@ -150,10 +220,6 @@ namespace GruppHWeatherTemp.Methods
                 if (averageTemperature != double.MinValue)
                 {
                     Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C");
-
-                    string logText = $"Temperatur (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C";
-                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
-                    saveDelegate(logText);
                 }
 
             }
@@ -176,10 +242,6 @@ namespace GruppHWeatherTemp.Methods
                 if (averageTemperature != double.MinValue)
                 {
                     Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C");
-
-                    string logText = $"Temperatur (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C";
-                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
-                    saveDelegate(logText);
                 }
 
             }
@@ -268,9 +330,6 @@ namespace GruppHWeatherTemp.Methods
                 if (averageHumidity != double.MinValue)
                 {
                     Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %");
-                    string logText = $"Luftfuktighet (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %";
-                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
-                    saveDelegate(logText);
                 }
 
             }
@@ -293,10 +352,6 @@ namespace GruppHWeatherTemp.Methods
                 if (averageHumidity != double.MinValue)
                 {
                     Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %");
-
-                    string logText = $"Luftfuktighet (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %";
-                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
-                    saveDelegate(logText);
                 }
 
             }

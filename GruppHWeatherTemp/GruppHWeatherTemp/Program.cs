@@ -44,12 +44,7 @@ namespace GruppHWeatherTemp
                         break;
                     case '6':
                         Console.Clear();
-                        ReadWriteFile.DisplayMoldRiskInsideMonth(readings);
-                        ReadWriteFile.DisplayMoldRiskOutsideMonth(readings);
-                        ReadWriteFile.DisplayInsideAveragesTempMonth(readings);
-                        ReadWriteFile.DisplayOutsideAveragesTempMonth(readings);
-                        ReadWriteFile.DisplayOutsideAveragesHumidityMonth(readings);
-                        ReadWriteFile.DisplayInsideAveragesHumidityMonth(readings);
+                        ReadWriteFile.DisplayMonthlyData(readings);
                         Console.WriteLine("\nData sparat i log.txt!");
                         Console.ReadKey(true);
                         break;
