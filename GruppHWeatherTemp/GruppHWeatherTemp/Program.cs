@@ -1,22 +1,21 @@
 ﻿using GruppHWeatherTemp.Methods;
 using GruppHWeatherTemp.Models;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 namespace GruppHWeatherTemp
 {
     internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             string filePath = "../../../Files/tempdata.txt";
 
             List<WeatherTools> readings = ReadWriteFile.ReadDataFromFile(filePath);
-            
+
             while (true)
             {
-                Console.Clear();        
-                List<string> startText = new List<string> {"[1] Visa all data", "[2] Medeltemperatur (inomhus)", "[3] Medeltemperatur (utomhus)",
-                    "[4] Medel luftfuktighet (inomhus)", "[5] Medel luftfuktighet (utomhus)", "[E] Exit" };
+                Console.Clear();
+                List<string> startText = new List<string> {"[1] Visa all data", "[2] Visa TempData", "[3] Visa luftfuktighet",
+                    "[4] Visa mögelrisk", "[5] Skriv in datum","[6] Spara månadsdata till log.txt", "[E] Exit" };
                 var loginWindow = new Window("VäderData", 0, 1, startText);
                 loginWindow.DrawWindow();
 
@@ -24,26 +23,34 @@ namespace GruppHWeatherTemp
                 switch (key.KeyChar)
                 {
                     case '1':
-                        ReadWriteFile.DisplayAllReadings(readings, filePath);
+                        ReadWriteFile.DisplayAllReadings(readings);
                         break;
                     case '2':
                         Console.Clear();
-                        ReadWriteFile.DisplayInsideAveragesTemp(readings);
-                        Console.ReadKey(true);
+                        Switches.TemperatureSwitch(readings);
                         break;
                     case '3':
                         Console.Clear();
-                        ReadWriteFile.DisplayOutsideAveragesTemp(readings);
-                        Console.ReadKey(true);
+                        Switches.HumiditySwitch(readings);
                         break;
                     case '4':
                         Console.Clear();
-                        ReadWriteFile.DisplayInsideAveragesHumidity(readings);
-                        Console.ReadKey(true);
+                        Switches.MoldRiskSwitch(readings);
                         break;
                     case '5':
                         Console.Clear();
-                        ReadWriteFile.DisplayOutsideAveragesHumidity(readings);
+                        ReadWriteFile.InputDate(readings);
+                        Console.ReadKey(true);
+                        break;
+                    case '6':
+                        Console.Clear();
+                        ReadWriteFile.DisplayMoldRiskInsideMonth(readings);
+                        ReadWriteFile.DisplayMoldRiskOutsideMonth(readings);
+                        ReadWriteFile.DisplayInsideAveragesTempMonth(readings);
+                        ReadWriteFile.DisplayOutsideAveragesTempMonth(readings);
+                        ReadWriteFile.DisplayOutsideAveragesHumidityMonth(readings);
+                        ReadWriteFile.DisplayInsideAveragesHumidityMonth(readings);
+                        Console.WriteLine("\nData sparat i log.txt!");
                         Console.ReadKey(true);
                         break;
                     case 'e':
@@ -51,35 +58,9 @@ namespace GruppHWeatherTemp
                         break;
                     default:
                         Console.WriteLine("Wrong Input");
-                        Console.ReadKey();
+                        Console.ReadKey(true);
                         break;
-
                 }
-                
-                //Console.Write("Enter the date (yyyy-MM-dd): ");
-
-
-                //string inputDate = Console.ReadLine();
-
-                //if (DateTime.TryParse(inputDate, out DateTime selectedDate))
-                //{
-                //    //string filePath = "../../../Files/tempdata.txt";
-
-                //    //List<WeatherTools> readings = ReadWriteFile.ReadDataFromFile(filePath);
-
-                //    if (readings.Count > 0)
-                //    {
-                //        ReadWriteFile.CalculateAndDisplayAverages(selectedDate, readings);
-                //    }
-                //    else
-                //    {
-                //        Console.WriteLine("No valid data found in the file.");
-                //    }
-                //}
-                //else
-                //{
-                //    Console.WriteLine("Invalid date format. Please enter the date in the format yyyy-MM-dd.");
-                //}
             }
         }
     }
