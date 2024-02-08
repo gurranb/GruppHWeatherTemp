@@ -28,8 +28,8 @@ namespace GruppHWeatherTemp.Methods
                         string timestamps = match.Groups[1].Value;
                         string month = timestamps.Substring(5, 2);
                         string year = timestamps.Substring(0, 4);
+                        string location = match.Groups["location"].Value;
                         double temp = double.Parse(match.Groups["temperature"].Value);
-                        //string tempValue = temp.Substring(0, 4);
 
                         if (year != "2017" && month != "05" && temp < 40)
                         {
@@ -55,12 +55,12 @@ namespace GruppHWeatherTemp.Methods
         public static void DisplayAllReadings(List<WeatherTools> readings, string filePath)
         {
             Console.WriteLine($"Readings for all dates:");
-            string[] lines = File.ReadAllLines(filePath);
-
-            
+            //string[] lines = File.ReadAllLines(filePath);
+            int rowCount = 1;
             foreach (var reading in readings)
             {
-                Console.WriteLine(reading.Timestamp.ToString() + " " + reading.Location + " " + reading.Temperature  + "C" + " " + reading.Humidity + "%");
+                Console.WriteLine(rowCount + ". " + reading.Timestamp.ToString() + " " + reading.Location + " " + reading.Temperature  + "C" + " " + reading.Humidity + "%");
+                rowCount++;
             }
         }
 
@@ -84,8 +84,114 @@ namespace GruppHWeatherTemp.Methods
             }
         }
 
+        public static void DisplayInsideAveragesTemp(List<WeatherTools> readings)
+        {
+            Console.WriteLine("Sorterat enligt varmast till kallaste dagen 'inomhus' enligt medeltemperatur per dag");
+            Console.WriteLine("------------------------------------------------------------------------------------");
+
+            var uniqueDates = readings
+                .Select(r => r.Timestamp.Date)
+                .Distinct()
+                .OrderByDescending(date => GetAverageTemperature(readings, date, "Inne"))
+                .ToList();
+
+            foreach (var date in uniqueDates)
+            {
+                double averageTemperature = GetAverageTemperature(readings, date, "Inne");
+
+                if (averageTemperature != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {date.ToShortDateString()}: {averageTemperature:F1} °C");
+                }
+            }
+        }
+
+        public static void DisplayOutsideAveragesTemp(List<WeatherTools> readings)
+        {
+            Console.WriteLine("Sorterat enligt varmast till kallaste dagen 'utomhus' enligt medeltemperatur per dag");
+            Console.WriteLine("------------------------------------------------------------------------------------");
+
+            var uniqueDates = readings
+                .Select(r => r.Timestamp.Date)
+                .Distinct()
+                .OrderByDescending(date => GetAverageTemperature(readings, date, "Ute"))
+                .ToList();
+
+            foreach (var date in uniqueDates)
+            {
+                double averageTemperature = GetAverageTemperature(readings, date, "Ute");
+
+                if (averageTemperature != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {date.ToShortDateString()}: {averageTemperature:F1} °C");
+                }
+            }
+        }
+
+        public static void DisplayOutsideAveragesHumidity(List<WeatherTools> readings)
+        {
+            Console.WriteLine("Sorterat enligt torrast till fuktigaste dagen 'utomhus' enligt medelluftfuktighet per dag");
+            Console.WriteLine("-----------------------------------------------------------------------------------------");
+
+            var uniqueDates = readings
+                .Select(r => r.Timestamp.Date)
+                .Distinct()
+                .OrderBy(date => GetAverageHumidity(readings, date, "Ute"))
+                .ToList();
+            
+            foreach (var date in uniqueDates)
+            {
+                double averageHumidity = GetAverageHumidity(readings, date, "Ute");
+
+                if (averageHumidity != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {date.ToShortDateString()}: {averageHumidity:F1} %");
+                }
+            }
+        }
+
+        public static void DisplayInsideAveragesHumidity(List<WeatherTools> readings)
+        {
+            Console.WriteLine("Sorterat enligt torrast till fuktigaste dagen 'inomhus' enligt medelluftfuktighet per dag");
+            Console.WriteLine("-----------------------------------------------------------------------------------------");
+
+            var uniqueDates = readings
+                .Select(r => r.Timestamp.Date)
+                .Distinct()
+                .OrderBy(date => GetAverageHumidity(readings, date, "Inne"))
+                .ToList();
+
+            foreach (var date in uniqueDates)
+            {
+                double averageHumidity = GetAverageHumidity(readings, date, "Inne");
+
+                if (averageHumidity != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {date.ToShortDateString()}: {averageHumidity:F1} %");
+                }
+            }
+        }
+
+        private static double GetAverageTemperature(List<WeatherTools> readings, DateTime date, string location)
+        {
+            var locationReadings = readings
+                .Where(r => r.Timestamp.Date == date && r.Location == location);
+
+            return locationReadings.Any() ? locationReadings.Average(r => r.Temperature) : double.MinValue;
+        }
+
+        private static double GetAverageHumidity(List<WeatherTools> readings, DateTime date, string location)
+        {
+            var locationReadings = readings
+                .Where(r => r.Timestamp.Date == date && r.Location == location);
+
+            return locationReadings.Any() ? locationReadings.Average(r => r.Humidity) : double.MinValue;
+        }
+
         public static void CalculateAndDisplayAverages(DateTime selectedDate, List<WeatherTools> readings)
         {
+
+
             var selectedDateReadings = readings
                 .Where(r => r.Timestamp.Date == selectedDate.Date)
                 .ToList();
