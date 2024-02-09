@@ -10,6 +10,8 @@ namespace GruppHWeatherTemp
             string filePath = "../../../Files/tempdata.txt";
 
             List<WeatherTools> readings = ReadWriteFile.ReadDataFromFile(filePath);
+            
+
 
             while (true)
             {
@@ -51,6 +53,11 @@ namespace GruppHWeatherTemp
                         ReadWriteFile.DisplayOutsideAveragesHumidityMonth(readings);
                         ReadWriteFile.DisplayInsideAveragesHumidityMonth(readings);
                         Console.WriteLine("\nData sparat i log.txt!");
+                        Console.ReadKey(true);
+                        break;
+                    case '8':
+                        Console.Clear();
+                        ReadWriteFile.FindConsecutiveDays(readings);
                         Console.ReadKey(true);
                         break;
                     case 'e':
