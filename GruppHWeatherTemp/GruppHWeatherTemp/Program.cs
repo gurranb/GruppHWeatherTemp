@@ -17,7 +17,7 @@ namespace GruppHWeatherTemp
             {
                 Console.Clear();
                 List<string> startText = new List<string> {"[1] Visa all data", "[2] Visa TempData", "[3] Visa luftfuktighet",
-                    "[4] Visa mögelrisk", "[5] Skriv in datum","[6] Spara månadsdata till log.txt", "[E] Exit" };
+                    "[4] Visa mögelrisk", "[5] Skriv in datum","[6] Spara månadsdata till log.txt","[7] Meterologisk data", "[E] Exit" };
                 var loginWindow = new Window("VäderData", 0, 1, startText);
                 loginWindow.DrawWindow();
 
@@ -46,22 +46,13 @@ namespace GruppHWeatherTemp
                         break;
                     case '6':
                         Console.Clear();
-                        ReadWriteFile.DisplayMoldRiskInsideMonth(readings);
-                        ReadWriteFile.DisplayMoldRiskOutsideMonth(readings);
-                        ReadWriteFile.DisplayInsideAveragesTempMonth(readings);
-                        ReadWriteFile.DisplayOutsideAveragesTempMonth(readings);
-                        ReadWriteFile.DisplayOutsideAveragesHumidityMonth(readings);
-                        ReadWriteFile.DisplayInsideAveragesHumidityMonth(readings);
+                        ReadWriteFile.DisplayMonthlyData(readings);
                         Console.WriteLine("\nData sparat i log.txt!");
                         Console.ReadKey(true);
                         break;
-                    case '8':
+                    case '7':
                         Console.Clear();
                         ReadWriteFile.FindStartOfFall(readings);
-                        Console.ReadKey(true);
-                        break;
-                    case '9':
-                        Console.Clear();
                         ReadWriteFile.FindStartOFWinter(readings);
                         Console.ReadKey(true);
                         break;
@@ -69,7 +60,7 @@ namespace GruppHWeatherTemp
                         Environment.Exit(0);
                         break;
                     default:
-                        Console.WriteLine("Wrong Input");
+                        ("Wrong Input").Cw();
                         Console.ReadKey(true);
                         break;
                 }

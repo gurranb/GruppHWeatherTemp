@@ -40,19 +40,15 @@
                 Console.Write('┌' + new String('─', width + 2) + '┐');
             }
 
-            // Rita raderna i sträng-Listan
             for (int j = 0; j < TextRows.Count; j++)
             {
                 Console.SetCursorPosition(Left, Top + j + 1);
                 Console.WriteLine('│' + " " + TextRows[j] + new String(' ', width - TextRows[j].Length + 1) + '│');
             }
 
-            // Rita undre delen av fönstret
             Console.SetCursorPosition(Left, Top + TextRows.Count + 1);
             Console.Write('└' + new String('─', width + 2) + '┘');
 
-
-            // Kolla vilket som är den nedersta posotion, i alla fönster, som ritats ut
             if (Lowest.LowestPosition < Top + TextRows.Count + 2)
             {
                 Lowest.LowestPosition = Top + TextRows.Count + 2;

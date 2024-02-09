@@ -108,6 +108,81 @@ namespace GruppHWeatherTemp.Methods
                 Console.WriteLine("Ingen höst detta år.");
             }
         }
+        public static void DisplayMonthlyData(List<WeatherTools> readings)
+        {
+            Console.WriteLine("Data per månad");
+            Console.WriteLine("------------------------------------------");
+
+            var uniqueDates = readings
+                    .GroupBy(r => new { r.Timestamp.Year, r.Timestamp.Month })
+                    .OrderByDescending(group => GetAverageTemperatureMonth(readings, group.Key.Year, group.Key.Month, "Ute"))
+                    .ToList();
+
+            foreach (var date in uniqueDates)
+            {
+                double averageTemperature = GetAverageTemperatureMonth(readings, date.Key.Year, date.Key.Month, "Ute");
+
+                if (averageTemperature != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C");
+
+                    string logText = $"Temperatur (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageMold = GetAverageMoldRisk(readings, date.Key.Year, date.Key.Month, "Ute");
+
+                if (averageMold != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}");
+                    string logText = $"Mögel (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageHumidity = GetAverageHumidityMonth(readings, date.Key.Year, date.Key.Month, "Ute");
+
+                if (averageHumidity != double.MinValue)
+                {
+                    Console.WriteLine($"(Ute) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %");
+                    string logText = $"Luftfuktighet (Ute) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+            }
+            var uniqueDates2 = readings
+                    .GroupBy(r => new { r.Timestamp.Year, r.Timestamp.Month })
+                    .OrderByDescending(group => GetAverageTemperatureMonth(readings, group.Key.Year, group.Key.Month, "Inne"))
+                    .ToList();
+            foreach (var date in uniqueDates2)
+            {
+                double averageTemperature = GetAverageTemperatureMonth(readings, date.Key.Year, date.Key.Month, "Inne");
+                if (averageTemperature != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C");
+
+                    string logText = $"Temperatur (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageTemperature,5:F1} °C";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageMold = GetAverageMoldRisk(readings, date.Key.Year, date.Key.Month, "Inne");
+                if (averageMold != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}");
+                    string logText = $"Mögel (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy")}:  {averageMold:0.00}";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+                double averageHumidity = GetAverageHumidityMonth(readings, date.Key.Year, date.Key.Month, "Inne");
+                if (averageHumidity != double.MinValue)
+                {
+                    Console.WriteLine($"(Inne) - {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %");
+                    string logText = $"Luftfuktighet (Inne) {new DateTime(date.Key.Year, date.Key.Month, 1).ToString("MMMM yyyy"),-15} {averageHumidity,5:F1} %";
+                    TextToFile.MyDelegateStr saveDelegate = TextToFile.SaveToFile;
+                    saveDelegate(logText);
+                }
+
+            }
+        }
         public static void FindStartOFWinter(List<WeatherTools> readings)
         {
             if (readings == null || readings.Count == 0)
@@ -461,7 +536,8 @@ namespace GruppHWeatherTemp.Methods
                 double averageHumidity = monthReadings.Average(r => r.Humidity);
 
                 // Williamson Etheridge formula
-                double averageMoldRisk = (averageTemperature - 0.55) * (averageHumidity / 100) * 10;
+                //double averageMoldRisk = (averageTemperature - 0.55) * (averageHumidity / 100) * 10;
+                double averageMoldRisk = ((averageHumidity-78) * (averageTemperature / 15)) / 0.22/100;
                 return averageMoldRisk;
             }
             else
@@ -472,8 +548,8 @@ namespace GruppHWeatherTemp.Methods
 
         public static void InputDate(List<WeatherTools> readings)
         {
-            Console.Write("Skriv in datum från 2016-06-01 till 2016-12-23 med format (yyyy-MM-dd): ");
-
+            Console.Write("Skriv in datum från 2016-06-01 till 2016-12-23\nmed format (YYYY-MM-DD): ");
+            
             string inputDate = Console.ReadLine();
 
             if (DateTime.TryParse(inputDate, out DateTime selectedDate))

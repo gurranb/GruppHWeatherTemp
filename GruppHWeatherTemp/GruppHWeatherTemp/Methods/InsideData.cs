@@ -8,5 +8,6 @@ namespace GruppHWeatherTemp.Methods
 {
     internal class InsideData
     {
+
     }
 }
