@@ -57,7 +57,12 @@ namespace GruppHWeatherTemp
                         break;
                     case '8':
                         Console.Clear();
-                        ReadWriteFile.FindConsecutiveDays(readings);
+                        ReadWriteFile.FindStartOfFall(readings);
+                        Console.ReadKey(true);
+                        break;
+                    case '9':
+                        Console.Clear();
+                        ReadWriteFile.FindStartOFWinter(readings);
                         Console.ReadKey(true);
                         break;
                     case 'e':
