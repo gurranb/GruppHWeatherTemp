@@ -28,12 +28,14 @@ namespace GruppHWeatherTemp.Methods
                             string month = timestamps.Substring(5, 2);
                             string year = timestamps.Substring(0, 4);
                             string location = match.Groups["location"].Value;
-                            double temp = double.Parse(match.Groups["temperature"].Value);
+                            //double.Parse(match.Groups["temperature"].Value;
+                            double temp = double.Parse(match.Groups["temperature"].Value.Replace(".",","));
 
                             if (year != "2017" && month != "05" && temp < 40)
                             {
+                               // double.TryParse(match.Groups["temperature"].Value
                                 if (DateTime.TryParse(match.Groups[1].Value, out DateTime timestamp) &&
-                                        double.TryParse(match.Groups["temperature"].Value, out double temperature) &&
+                                        double.TryParse(match.Groups["temperature"].Value.Replace(".", ","), out double temperature) &&
                                         int.TryParse(match.Groups["humidity"].Value, out int humidity))
                                 {
                                     readings.Add(new WeatherTools(timestamp, match.Groups[2].Value, temperature, humidity));
@@ -48,6 +50,122 @@ namespace GruppHWeatherTemp.Methods
                 Console.WriteLine($"Error reading data from file: {ex.Message}");
             }
             return readings;
+        }
+        public static void FindStartOfFall(List<WeatherTools> readings)
+        {
+            if (readings == null || readings.Count == 0)
+            {
+                Console.WriteLine("Ingen data hittades.");
+                return;
+            }
+
+            Dictionary<DateTime, double> averageTemperatures = new Dictionary<DateTime, double>();
+            DateTime currentDate = readings[0].Timestamp.Date;
+            int consecutiveDays = 0;
+
+            foreach (var reading in readings)
+            {
+                if (!averageTemperatures.ContainsKey(reading.Timestamp.Date))
+                {
+                    var locationReadings = readings
+                        .Where(r => r.Timestamp.Date == reading.Timestamp.Date && r.Location == "Ute");
+
+                    if (locationReadings.Any())
+                    {
+                        averageTemperatures.Add(reading.Timestamp.Date, locationReadings.Average(r => r.Temperature));
+                    }
+                    else
+                    {
+                        averageTemperatures.Add(reading.Timestamp.Date, double.MinValue);
+                    }
+                }
+            }
+
+            foreach (var kvp in averageTemperatures)
+            {
+                if (kvp.Value < 10)
+                {
+                    consecutiveDays++;
+                    if (consecutiveDays == 5)
+                    {
+                        Console.WriteLine($"Hösten är beräknad att vara här den:");
+                        for (int i = 0; i < 5; i++)
+                        {
+                            var date = kvp.Key.AddDays(-4 + i);
+                            Console.WriteLine($"Datum: {date.ToShortDateString()}, Medel Temp: {averageTemperatures[date]:F1}°C");
+                        }
+                        Console.WriteLine();
+                        break;
+                    }
+                }
+                else
+                {
+                    consecutiveDays = 0;
+                }
+            }
+
+            if (consecutiveDays < 5)
+            {
+                Console.WriteLine("Ingen höst detta år.");
+            }
+        }
+        public static void FindStartOFWinter(List<WeatherTools> readings)
+        {
+            if (readings == null || readings.Count == 0)
+            {
+                Console.WriteLine("Ingen data hittades.");
+                return;
+            }
+
+            Dictionary<DateTime, double> averageTemperatures = new Dictionary<DateTime, double>();
+            DateTime currentDate = readings[0].Timestamp.Date;
+            int consecutiveDays = 0;
+
+            foreach (var reading in readings)
+            {
+                if (!averageTemperatures.ContainsKey(reading.Timestamp.Date))
+                {
+                    var locationReadings = readings
+                        .Where(r => r.Timestamp.Date == reading.Timestamp.Date && r.Location == "Ute");
+
+                    if (locationReadings.Any())
+                    {
+                        averageTemperatures.Add(reading.Timestamp.Date, locationReadings.Average(r => r.Temperature));
+                    }
+                    else
+                    {
+                        averageTemperatures.Add(reading.Timestamp.Date, double.MinValue);
+                    }
+                }
+            }
+
+            foreach (var kvp in averageTemperatures)
+            {
+                if (kvp.Value <= 1)
+                {
+                    consecutiveDays++;
+                    if (consecutiveDays == 5)
+                    {
+                        Console.WriteLine($"Vintern är beräknad att vara här den:");
+                        for (int i = 0; i < 5; i++)
+                        {
+                            var date = kvp.Key.AddDays(-4 + i);
+                            Console.WriteLine($"Datum: {date.ToShortDateString()}, Medel Temp: {averageTemperatures[date]:F1}°C");
+                        }
+                        Console.WriteLine();
+                        break;
+                    }
+                }
+                else
+                {
+                    consecutiveDays = 0;
+                }
+            }
+
+            if (consecutiveDays < 5)
+            {
+                Console.WriteLine("Ingen vinter detta år.");
+            }
         }
 
         public static void DisplayMonthlyData(List<WeatherTools> readings)
